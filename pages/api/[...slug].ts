@@ -1,4 +1,4 @@
-import { NextApiRequest, NextApiResponse } from 'next'
+import {NextApiRequest, NextApiResponse} from 'next'
 import fs from 'fs'
 import path from 'path'
 
@@ -25,8 +25,25 @@ interface MappingsConfig {
     mappings: Mapping[]
 }
 
+// Functie om de body van de request te loggen
+async function getRequestBody(req: NextApiRequest) {
+    // Lees de body van de request
+    return new Promise<string>((resolve, reject) => {
+        let data = ''
+        req.on('data', chunk => {
+            data += chunk
+        })
+        req.on('end', () => {
+            resolve(data)
+        })
+        req.on('error', (err) => {
+            reject(err)
+        })
+    })
+}
+
 // De catch-all API handler
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     // Laad de mappings.json in
     const mappingsFilePath = path.join(process.cwd(), 'mappings.json')
     const mappingsData = fs.readFileSync(mappingsFilePath, 'utf8')
@@ -35,13 +52,22 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     const verbose = mappings.verbose; // Haal de verbose optie op
 
     if (verbose) {
-        console.log(`Incoming Request: ${req.method} ${req.url}`);
+
+        console.log(`Request received: ${req.method} ${req.url}`);
+
+        // Log de request headers
         console.log(`Request Headers:`, req.headers);
+
+        // Log de query parameters
         console.log(`Request Query:`, req.query);
+
+        // Log de request body (asynchroon)
+        const body = await getRequestBody(req);
+        console.log(`Request Body:`, body);
     }
 
     // Haal de "slug" (pad van de request) op uit de query
-    const { slug } = req.query
+    const {slug} = req.query
     const slugPath = Array.isArray(slug) ? `/${slug.join('/')}` : `/${slug}`
 
     // Zoek naar een overeenkomstige mapping op basis van method, URL, query en headers
@@ -68,7 +94,9 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
         const response = match.response
 
         if (verbose) {
-            console.log(`Matched Mapping: ${JSON.stringify(match)}`);
+
+            console.log(`Matched response definition:`);
+            console.log(`${JSON.stringify(match.response, null, 2)}`);
         }
 
         // Verwerk de body dynamisch
@@ -79,7 +107,9 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 
         // Log de response als verbose is ingeschakeld
         if (verbose) {
-            console.log(`Response Body: ${responseBody}`);
+
+            console.log(`Response:`);
+            console.log(`${responseBody}`);
         }
 
         // Stuur de response terug
@@ -87,9 +117,10 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     } else {
         // Geen match gevonden
         if (verbose) {
-            console.log('No matching mapping found for this request.');
+
+            console.log(`No matching mapping found for this request.`);
         }
-        res.status(404).json({ message: 'No mock configuration found for this request' })
+        res.status(404).json({message: 'No mock configuration found for this request'})
     }
 }
 

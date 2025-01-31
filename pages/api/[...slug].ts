@@ -26,24 +26,17 @@ interface MappingsConfig {
 }
 
 // Functie om de body van de request te loggen
-async function getRequestBody(req: NextApiRequest) {
+function getRequestBody(req: NextApiRequest) {
     // Lees de body van de request
-    return new Promise<string>((resolve, reject) => {
-        let data = ''
-        req.on('data', chunk => {
-            data += chunk
-        })
-        req.on('end', () => {
-            resolve(data)
-        })
-        req.on('error', (err) => {
-            reject(err)
-        })
-    })
+    try {
+        return JSON.stringify(req.body);
+    } catch (e: any) {
+    }
+    return String(req.body);
 }
 
 // De catch-all API handler
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default function handler(req: NextApiRequest, res: NextApiResponse) {
     // Laad de mappings.json in
     const mappingsFilePath = path.join(process.cwd(), 'mappings.json')
     const mappingsData = fs.readFileSync(mappingsFilePath, 'utf8')
@@ -62,8 +55,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         console.log(`Request Query:`, req.query);
 
         // Log de request body (asynchroon)
-        const body = await getRequestBody(req);
-        console.log(`Request Body:`, body);
+        const body = getRequestBody(req);
+        console.log(`Request Body:`, JSON.stringify(body));
     }
 
     // Haal de "slug" (pad van de request) op uit de query

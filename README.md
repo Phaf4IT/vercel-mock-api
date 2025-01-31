@@ -1,3 +1,8 @@
+# Mock API with Vercel
+
+A very simplified version of a wiremock-alike server which can run on vercel. Just change the mappings.json to your preference.
+For future improvements, we could reference the mappings.json from a blog storage or database and add dynamic updates.
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started

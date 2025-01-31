@@ -1,0 +1,79 @@
+{
+  "verbose": true,
+  "mappings": [
+    {
+      "request": {
+        "method": "POST",
+        "url": "/v3.1/send"
+      },
+      "response": {
+        "status": 200,
+        "body": "{}",
+        "headers": {
+          "Content-Type": "json/application"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "/users",
+        "query": {
+          "id": "123"
+        },
+        "headers": {
+          "Authorization": "Bearer {{token}}"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "id": "123",
+          "name": "John Doe",
+          "email": "johndoe@example.com"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "url": "/users",
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      },
+      "response": {
+        "status": 201,
+        "body": {
+          "id": "{{request.body.id}}",
+          "name": "{{request.body.name}}",
+          "email": "{{request.body.email}}"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "/products",
+        "query": {
+          "category": "electronics"
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": [
+          {
+            "id": 1,
+            "name": "Smartphone",
+            "price": 599
+          },
+          {
+            "id": 2,
+            "name": "Laptop",
+            "price": 999
+          }
+        ]
+      }
+    }
+  ]
+}
